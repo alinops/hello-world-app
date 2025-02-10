@@ -28,18 +28,19 @@ This project is a simple containerized web application with a React frontend and
 ## **Setup Instructions**
 ### **1. Clone the Repository**
    ```bash
-   git clone https://github.com/alinzya/myapp.git
-   cd hello-world-app
+   git clone git@github.com:alinops/hello-world-app.git
    ```
 ### **2. Build and start the application using Docker Compose**
    ```bash
    ./build-docker.sh --local
    ```
+      ```bash
    Command-line arguments:
      --local: Builds Docker images locally without uploading.
      --docker: Builds Docker images and uploads them to Docker Hub. If selected, the script prompts the user to enter their Docker Hub username.
      --version: Specifies the version tag for the Docker images (default: latest).
-
+   ```
+   
    ```bash
    docker-compose up
    ```
