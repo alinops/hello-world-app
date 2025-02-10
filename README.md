@@ -34,13 +34,14 @@ This project is a simple containerized web application with a React frontend and
    ```bash
    ./build-docker.sh --local
    ```
-      ```bash
+
+   ```bash
    Command-line arguments:
      --local: Builds Docker images locally without uploading.
      --docker: Builds Docker images and uploads them to Docker Hub. If selected, the script prompts the user to enter their Docker Hub username.
      --version: Specifies the version tag for the Docker images (default: latest).
    ```
-   
+
    ```bash
    docker-compose up
    ```
