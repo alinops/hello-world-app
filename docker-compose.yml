@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  backend-app:
+    container_name: backend-app
+    image: backend-app:v1.0.3
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - helloworld-network
+
+  frontend-app:
+    container_name: frontend-app
+    image: frontend-app:v1.0.3
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend-app:3003
+    depends_on:
+      - backend-app
+    networks:
+      - helloworld-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - backend-app
+    networks:
+      - helloworld-network
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3004:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - helloworld-network
+
+
+volumes:
+  grafana-storage:
+
+networks:
+  helloworld-network:
+    driver: bridge
+

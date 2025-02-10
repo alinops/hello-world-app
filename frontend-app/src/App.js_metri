@@ -1,0 +1,71 @@
+import React, { useEffect } from 'react';
+import prometheus from 'prom-client';
+
+// Create a Registry to register metrics
+const register = new prometheus.Registry();
+
+// Custom metrics
+const pageLoadCount = new prometheus.Counter({
+  name: 'frontend_page_load_count',
+  help: 'Total number of page loads',
+});
+
+const apiCallDuration = new prometheus.Histogram({
+  name: 'frontend_api_call_duration_seconds',
+  help: 'Duration of API calls in seconds',
+  labelNames: ['endpoint', 'status'],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10], // Buckets for response time ranges
+});
+
+// Register custom metrics
+register.registerMetric(pageLoadCount);
+register.registerMetric(apiCallDuration);
+
+// Function to track API call duration
+const trackApiCall = async (endpoint, callback) => {
+  const start = Date.now();
+  try {
+    const response = await callback();
+    const duration = (Date.now() - start) / 1000; // Convert to seconds
+    apiCallDuration.observe({ endpoint, status: 'success' }, duration);
+    return response;
+  } catch (error) {
+    const duration = (Date.now() - start) / 1000;
+    apiCallDuration.observe({ endpoint, status: 'error' }, duration);
+    throw error;
+  }
+};
+
+function App() {
+  // Track page load
+  useEffect(() => {
+    pageLoadCount.inc();
+  }, []);
+
+  // Example API call
+  const fetchData = async () => {
+    return trackApiCall('/api/hello', async () => {
+      const response = await fetch(`${process.env.BACKEND_URL}/api/hello`);
+      if (!response.ok) {
+        throw new Error('API call failed');
+      }
+      return response.json();
+    });
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData()
+      .then((data) => console.log('Data:', data))
+      .catch((error) => console.error('Error:', error));
+  }, []);
+
+  return (
+    <div style={{ textAlign: 'center', marginTop: '50px' }}>
+      <h1>Hello World!</h1>
+      <p>Check the console for API call results.</p>
+    </div>
+  );
+}
+
+export default App;
